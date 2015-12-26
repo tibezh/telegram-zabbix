@@ -22,24 +22,21 @@ $COMMANDS_FOLDER = __DIR__ . '/Commands/';
 
 
 
-$error_hosts = array();
+$errors = array();
 try {
-  // connect to Zabbix API
+  // Connect to Zabbix API.
   $api = new ZabbixApi($ZABBIX_HOST . 'api_jsonrpc.php', $ZABBIX_USER, $ZABBIX_PASSWORD);
   $api->setDefaultParams(array(
     'output' => 'extend'
   ));
-  $hosts = $api->hostGet();
-  foreach ($hosts as $host) {
-    if (0 == $host->status && $host->error) {
-      $error_hosts[] = $host;
-    }
+  $triggers = $api->triggerGet(array('filter' => array('value' => 1)));
+  foreach ($triggers as $trigger) {
+    $errors[] = $trigger->description;
   }
-  
 }
 catch(Exception $e)
 {
-  // Exception in ZabbixApi catched
+  // Exception in ZabbixApi catched.
   echo $e->getMessage();
 }
 
@@ -57,20 +54,18 @@ try {
   $telegram->setLogVerbosity(3);
 
 
-  if (!empty($error_hosts)) {
-    foreach ($error_hosts as $host) {
-      $results = Request::sendToActiveChats(
-        'Error in host' . $host->name, //callback function to execute (see Request.php methods)
-        array('text' => Request::getInput()), //Param to evaluate the request
-        TRUE, //Send to chats (group chat)
-        TRUE, //Send to users (single chat)
-        NULL, //'yyyy-mm-dd hh:mm:ss' date range from
-        NULL  //'yyyy-mm-dd hh:mm:ss' date range to
-      );
-    }
+  if (!empty($errors)) {
+
+    $results = Request::sendToActiveChats(
+      'sendMessage', //callback function to execute (see Request.php methods)
+      array('text'=>"[Zabbix]\nWe have a problem\n" . implode(', ', $errors)), //Param to evaluate the request
+      false, //Send to chats (group chat)
+      true, //Send to users (single chat)
+      null, //'yyyy-mm-dd hh:mm:ss' date range from
+      null  //'yyyy-mm-dd hh:mm:ss' date range to
+    );
   }
 
-//  print_r($telegram->getVersion());
 
   $ServerResponse = $telegram->handleGetUpdates();
   if ($ServerResponse->isOk()) {
