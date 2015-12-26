@@ -1,0 +1,4 @@
+/vendor
+*.log
+settings.php
+.idea

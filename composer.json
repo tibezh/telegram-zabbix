@@ -1,0 +1,15 @@
+{
+    "name": "root/drudeskbot",
+    "description": "Bot for telegram",
+    "require": {
+        "longman/telegram-bot": "^0.24.0",
+        "monolog/monolog": "^1.17",
+        "confirm-it-solutions/php-zabbix-api": "2.2.*@dev"
+    },
+    "authors": [
+        {
+            "name": "tibezh",
+            "email": "tibezh@internetdevels.com"
+        }
+    ]
+}
